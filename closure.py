@@ -43,7 +43,7 @@ def Closure(fds, atts):
                 done = False
     return Cl
 
-def Closure_improved(fds, atts):
+def construct_indices(fds):
     count = {}
     lista = {}
     for w, z in fds.items():
@@ -52,6 +52,12 @@ def Closure_improved(fds, atts):
             if len(lista) == 0 or A not in lista:
                 lista[A] = []
             lista[A].append(tuple([w,z]))
+    return (count, lista)
+
+def Closure_improved(fds, atts):
+    count = construct_indices(fds)[0]
+    lista = construct_indices(fds)[1]
+
     closure = atts
     update = atts
     while len(update) != 0:
