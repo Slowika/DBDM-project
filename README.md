@@ -35,9 +35,15 @@ with a dictionary tuple containing fd -> integer. I used a tuple because we don'
 
 4.2 Strategy for Choose A
 -------------------------
+Choose A is implemented by a loop which iterates through all the attributes in the "update"
+and removes them from the set at every step. The iterations are over when there are no more elements in the "update".
+
 
 4.3 Find the bug
 -------------------------
+The corner case for Closure_improved is the input fd with the empty left side.
+In that case we don't construct the "lista" for this fd and skip it - while according to the FDs rules if the left side is empty
+we can access the right side from every set of attributes.
 
 6.1 Interestingness of generate
 -------------------------------
