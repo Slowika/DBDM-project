@@ -1,5 +1,6 @@
 import os
 import sys
+import random
 
 REPOSITORY_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)))
 EXAMPLES_DIR = os.path.join(REPOSITORY_DIR, "examples")
@@ -33,6 +34,8 @@ Main functions
 """
 
 def Closure(fds, atts):
+    if len(fds) == 0:
+        return atts
     Cl = atts
     done = False
     while (not done):
@@ -44,6 +47,8 @@ def Closure(fds, atts):
     return Cl
 
 def construct_indices(fds):
+    if len(fds) == 0:
+        return ({},{})
     count = {}
     lista = {}
     for w, z in fds.items():
@@ -55,6 +60,10 @@ def construct_indices(fds):
     return (count, lista)
 
 def Closure_improved(fds, atts):
+
+    if len(fds) == 0:
+        return atts
+
     count = construct_indices(fds)[0]
     lista = construct_indices(fds)[1]
 
@@ -63,11 +72,12 @@ def Closure_improved(fds, atts):
     while len(update) != 0:
         for A in update:
             update = update.difference(A)
-            for (w, z) in lista[A]:
-                count[(w,z)] = count[(w,z)] - 1
-                if count[(w,z)] == 0:
-                    update = update.union(z.difference(closure))
-                    closure = closure.union(z)
+            if A in lista:
+                for (w, z) in lista[A]:
+                    count[(w,z)] = count[(w,z)] - 1
+                    if count[(w,z)] == 0:
+                        update = update.union(z.difference(closure))
+                        closure = closure.union(z)
     return closure
 
 """
@@ -81,6 +91,14 @@ if __name__ == "__main__":
     if option == 'generate':
         n = sys.argv[2]
         print ("Generate a particular set of FDs for the integer: " + n)
+        fds_dict = {}
+        for i in range(int(n)):
+            fds_dict[i] = i+1
+        #SHUFFLE
+        keys = fds_dict.keys()
+        random.shuffle(keys)
+        for key in keys:
+            print (key, fds_dict[key])
     else:
         input = sys.argv[2]
 
