@@ -1,6 +1,8 @@
 import os
 import sys
+import time
 import random
+import matplotlib.pyplot as plt
 
 REPOSITORY_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)))
 EXAMPLES_DIR = os.path.join(REPOSITORY_DIR, "examples")
@@ -29,10 +31,22 @@ def fds_to_dict(fds):
                 fds_dict[keys] = values
     return fds_dict
 
+def timing(f):
+    def wrap(*args):
+        file = open('results.csv', 'a')
+        time1 = time.time()
+        ret = f(*args)
+        time2 = time.time()
+        print ('%s function took %0.3f ms' % (f.__name__, (time2-time1)*1000.0))
+        file.write('%s function took %0.3f ms\n' % (f.__name__, (time2-time1)*1000.0))
+        return ret
+    return wrap
+
 """
 Main functions
 """
 
+@timing
 def Closure(fds, atts):
     if len(fds) == 0:
         return atts
@@ -59,8 +73,8 @@ def construct_indices(fds):
             lista[A].append(tuple([w,z]))
     return (count, lista)
 
+@timing
 def Closure_improved(fds, atts):
-
     if len(fds) == 0:
         return atts
 
@@ -73,12 +87,21 @@ def Closure_improved(fds, atts):
         for A in update:
             update = update.difference(A)
             if A in lista:
+
                 for (w, z) in lista[A]:
                     count[(w,z)] = count[(w,z)] - 1
                     if count[(w,z)] == 0:
                         update = update.union(z.difference(closure))
                         closure = closure.union(z)
     return closure
+
+def generate(n):
+    fds_dict = {}
+    keys = [i for i in range(0, int(n))]
+    for key in keys:
+        fds_dict[frozenset([key])] = frozenset([key+1])
+    return fds_dict
+
 
 """
 Main program
@@ -91,19 +114,16 @@ if __name__ == "__main__":
     if option == 'generate':
         n = sys.argv[2]
         print ("Generate a particular set of FDs for the integer: " + n)
-        fds_dict = {}
-        for i in range(int(n)):
-            fds_dict[i] = i+1
-        #SHUFFLE
-        keys = fds_dict.keys()
+        fds = generate(n)
+        keys = fds.keys()
         random.shuffle(keys)
         for key in keys:
-            print (key, fds_dict[key])
+            print (key, fds[key])
+
     else:
         input = sys.argv[2]
 
         if input == "~":
-            #TODO
             fds_list = []
             for fd in sys.argv[3:]:
                 fds_list.append(fd)
@@ -125,4 +145,26 @@ if __name__ == "__main__":
             print ("Naive closure: " + str(Closure(fds, atts)))
         elif option == "improved":
             print ("Improved closure: " + str(Closure_improved(fds, atts)))
+        elif option == "compare":
+            file = open('results.csv', 'w')
+            atts = set()
+            x = [i for i in range(9)]
+            for i in x:
+                atts.add(str(i))
+                Closure(fds, atts)
+                Closure_improved(fds, atts)
+            #sample results
+            closure = [0.035, 0.042, 0.018, 0.031, 0.028, 0.015, 0.026, 0.012, 0.011]
+            closure_improved = [0.143, 0.121, 0.147, 0.141, 0.137, 0.134, 0.102, 0.136, 0.121]
+            plt.plot(x, closure, 'r')
+            plt.plot(x, closure_improved, 'b')
+            plt.show()
 
+    try:
+        sys.stdout.close()
+    except:
+        pass
+    try:
+        sys.stderr.close()
+    except:
+        pass

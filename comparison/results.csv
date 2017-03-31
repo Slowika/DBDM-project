@@ -1,0 +1,5 @@
+The chosen option: improved
+Reading FDs from the file: CCF2015P.txt
+{frozenset(['F']): frozenset(['B', 'E', 'D']), frozenset(['B']): frozenset(['D']), frozenset(['B', 'D']): frozenset(['C']), frozenset(['E']): frozenset(['C', 'G']), frozenset(['A', 'B']): frozenset(['H', 'G']), frozenset(['H']): frozenset(['G'])}
+Set of attributes: set(['B', 'D'])
+Improved closure: set(['C', 'B', 'D'])

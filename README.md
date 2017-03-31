@@ -47,6 +47,7 @@ we can access the right side from every set of attributes.
 
 6.1 Interestingness of generate
 -------------------------------
+The {n − 1 → n,n − 2 → n − 1,...,0 → 1} is an interesting set of functional dependencies because for every attribute A we know that the closure is {A, A+1..n}.
 
 6.2 Setup and methodology
 -------------------------
