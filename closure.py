@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import sys
 import time
@@ -13,7 +15,7 @@ Helping functions
 def fds_to_dict(fds):
     fds_dict = dict()
 
-    if type(fds) == "<class 'list'>":
+    if type(fds) == "list":
         print ("TODO: FDs read from the standard input")
     else:
         for line in fds:
@@ -31,7 +33,7 @@ def fds_to_dict(fds):
                 fds_dict[keys] = values
     return fds_dict
 
-def timing(f):
+"""def timing(f):
     def wrap(*args):
         file = open('results.csv', 'a')
         time1 = time.time()
@@ -41,12 +43,12 @@ def timing(f):
         file.write('%s function took %0.3f ms\n' % (f.__name__, (time2-time1)*1000.0))
         return ret
     return wrap
-
+"""
 """
 Main functions
 """
 
-@timing
+#@timing
 def Closure(fds, atts):
     if len(fds) == 0:
         return atts
@@ -73,7 +75,7 @@ def construct_indices(fds):
             lista[A].append(tuple([w,z]))
     return (count, lista)
 
-@timing
+#@timing
 def Closure_improved(fds, atts):
     if len(fds) == 0:
         return atts
@@ -126,8 +128,22 @@ if __name__ == "__main__":
         if input == "~":
             fds_list = []
             for fd in sys.argv[3:]:
-                fds_list.append(fd)
+                """ (* i am not sure if this is true (it's the same that read fds in a file ...*)
+            for line in fds_list:
+                if line != "" and line[0].isalnum():
+                    line = line.split('->')
+                    keys = line[0].split(' ')
 
+                    if len(line[1])>1 and line[1][-1].isalnum() == False:
+                        values = line[1][:-1].split(' ')
+                    else:
+                        values = line[1].split(' ')
+
+                    keys = (frozenset(filter(lambda x: x.isalnum()==True, keys)))
+                    values = (frozenset(filter(lambda x: x.isalnum()==True, values)))
+                    fds[keys] = values
+            print(fds)
+         """
         elif input[-4:] == ".txt":
             print ("Reading FDs from the file: " + input)
             file = open(EXAMPLES_DIR + "/" +input, "r")
