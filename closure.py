@@ -15,22 +15,16 @@ Helping functions
 def fds_to_dict(fds):
     fds_dict = dict()
 
-    if type(fds) == "list":
-        print ("TODO: FDs read from the standard input")
-    else:
-        for line in fds:
-            if line != "" and line[0].isalnum():
-                line = line.split('->')
-                keys = line[0].split(' ')
+    for line in fds.split('\n'):
+        if line != "" and line[0].isalnum():
+            line = line.split('->')
+            keys = line[0].split(' ')
+            values = line[1].strip()
+            values = line[1].split(' ')
 
-                if len(line[1])>1 and line[1][-1].isalnum() == False:
-                    values = line[1][:-1].split(' ')
-                else:
-                    values = line[1].split(' ')
-
-                keys = (frozenset(filter(lambda x: x.isalnum()==True, keys)))
-                values = (frozenset(filter(lambda x: x.isalnum()==True, values)))
-                fds_dict[keys] = values
+            keys = (frozenset(filter(lambda x: x.isalnum()==True, keys)))
+            values = (frozenset(filter(lambda x: x.isalnum()==True, values)))
+            fds_dict[keys] = values
     return fds_dict
 
 """def timing(f):
@@ -104,6 +98,56 @@ def generate(n):
         fds_dict[frozenset([key])] = frozenset([key+1])
     return fds_dict
 
+def check(G1, x, y):
+    closureX = Closure_improved(G1, x)
+    return y.issubset(closureX)
+
+def minimize(fds):
+    G = {}
+    for x, y in fds.items():
+        G[x] = Closure_improved(fds, x)
+    for x, y in G.items():
+        G1 = G.copy()
+        del G1[x]
+        if (check(G1, x, y) == True):
+            del(G[x])
+    return G
+
+def reduce(fds):
+    min = fds.copy()
+    for x, y in min.items():
+        w = y.copy()
+        del min[x]
+        for a in y:
+            min1 = min.copy()
+            min1.update({x: w.difference(a)})
+            if (check(min1, x, y) == True):
+                w = w.difference(a)
+        min.update({x: w})
+    return min
+
+def schema(fds):
+    atts = set()
+    for x, y in fds.items():
+        atts = atts.union(x).union(y)
+    return atts
+
+def isKeyOfSchema(fds, atts):
+    return schema(fds).issubset(Closure_improved(fds, atts))
+
+""" either x -> y is a trivial fd (y belongs to x) either x is a key for schema """
+def isBCNF(fds, atts):
+    for x, y in fds.items():
+        if not(x.issubset(y)): 
+            if not(isKeyOfSchema(fds, atts)):
+                return False
+    return True
+
+def frozensetInAttrs(frset):
+    resultat=''
+    for i in frset:
+        resultat+=str(i)+', '
+    return(resultat[:-2])
 
 """
 Main program
@@ -111,56 +155,47 @@ Main program
 
 if __name__ == "__main__":
     option = sys.argv[1][1:]
-    print ("The chosen option: " + option)
-
+    #print ("The chosen option: " + option)
+   
     if option == 'generate':
         n = sys.argv[2]
-        print ("Generate a particular set of FDs for the integer: " + n)
+        #print ("Generate a particular set of FDs for the integer: " + n)
         fds = generate(n)
         keys = fds.keys()
         random.shuffle(keys)
         for key in keys:
-            print (key, fds[key])
+            print (frozensetInAttrs(key) +" -> " +frozensetInAttrs(fds[key]))
 
     else:
         input = sys.argv[2]
 
-        if input == "~":
-            fds_list = []
-            for fd in sys.argv[3:]:
-                """ (* i am not sure if this is true (it's the same that read fds in a file ...*)
-            for line in fds_list:
-                if line != "" and line[0].isalnum():
-                    line = line.split('->')
-                    keys = line[0].split(' ')
-
-                    if len(line[1])>1 and line[1][-1].isalnum() == False:
-                        values = line[1][:-1].split(' ')
-                    else:
-                        values = line[1].split(' ')
-
-                    keys = (frozenset(filter(lambda x: x.isalnum()==True, keys)))
-                    values = (frozenset(filter(lambda x: x.isalnum()==True, values)))
-                    fds[keys] = values
-            print(fds)
-         """
-        elif input[-4:] == ".txt":
-            print ("Reading FDs from the file: " + input)
-            file = open(EXAMPLES_DIR + "/" +input, "r")
+        if input == "-":
+            file = sys.stdin.read()
             fds = fds_to_dict(file)
+     
+        elif input[-4:] == ".txt":
+            #print ("Reading FDs from the file: " + input)
+            file = open(EXAMPLES_DIR + "/" +input, "r")
+            fds = fds_to_dict(file.read())
             print (fds)
-
+            
+        atts = set()
         if len(sys.argv) > 3:
-            atts = set()
             for att in sys.argv[3:]:
                 if att.isalnum():
                     atts.add(att)
-            print ("Set of attributes: " + str(atts))
+            #print ("Set of attributes: " + str(atts))
 
         if option == "naive":
             print ("Naive closure: " + str(Closure(fds, atts)))
         elif option == "improved":
             print ("Improved closure: " + str(Closure_improved(fds, atts)))
+        elif option == "normalize":
+            fds=reduce(minimize(fds))
+            for key in fds.keys():
+                print (frozensetInAttrs(key) +" -> " +frozensetInAttrs(fds[key]))
+
+            
         elif option == "compare":
             file = open('results.csv', 'w')
             atts = set()
